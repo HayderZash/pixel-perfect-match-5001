@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791904853602,
+      "tag": "0000_university_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791904872279,
+      "tag": "0001_fix_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791904886840,
+      "tag": "0002_storage_policies",
+      "breakpoints": true
+    }
+  ]
+}
