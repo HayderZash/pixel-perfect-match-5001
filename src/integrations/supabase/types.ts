@@ -686,6 +686,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_session_instructor: { Args: { _session: string }; Returns: boolean }
+      is_session_student: { Args: { _session: string }; Returns: boolean }
       is_top_admin: { Args: { _user_id: string }; Returns: boolean }
       profile_college: { Args: { _user_id: string }; Returns: string }
       profile_department: { Args: { _user_id: string }; Returns: string }
