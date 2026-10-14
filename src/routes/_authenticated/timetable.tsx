@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AiTimetablePlanner } from "@/components/app/AiTimetablePlanner";
+import { useCourseInstructors } from "@/lib/data";
 
 export const Route = createFileRoute("/_authenticated/timetable")({
   head: () => pageHead("الجدول الدراسي", "إنشاء جداول صباحية ومسائية كاملة وإدارة القاعات."),
@@ -254,6 +256,7 @@ function TimetableEditor({ table, onBack }: { table: TT; onBack: () => void }) {
   const hName = nameMap(halls);
   const uName = new Map(users.map((u) => [u.id, u.full_name]));
   const fileRef = useRef<HTMLInputElement>(null);
+  const { data: links = [] } = useCourseInstructors();
 
   const blank = { day: 6, start: hours[0]!, course_id: "", session_type: "theory" as "theory" | "practical", hours: "2", instructor_id: "", hall_id: "", sub_group: "" };
   const [f, setF] = useState<typeof blank | null>(null);
@@ -397,6 +400,22 @@ function TimetableEditor({ table, onBack }: { table: TT; onBack: () => void }) {
           <Button variant="outline" size="sm" onClick={downloadTemplate}><FileDown className="ml-1 h-4 w-4" /> تنزيل القالب</Button>
           {editor && <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}><FileUp className="ml-1 h-4 w-4" /> رفع القالب</Button>}
           <Button variant="outline" size="sm" onClick={print}><Printer className="ml-1 h-4 w-4" /> PDF</Button>
+          {editor && (
+            <AiTimetablePlanner
+              shift={shift}
+              courses={courseOptions.map((c) => ({
+                id: c.id, code: c.code, name: c.name,
+                theory_remaining: courseStatus(c.id, "theory")?.remaining ?? 0,
+                practical_remaining: courseStatus(c.id, "practical")?.remaining ?? 0,
+                instructor_ids: links.filter((l) => l.course_id === c.id).map((l) => l.instructor_id),
+              }))}
+              instructors={instructorOptions.map((u) => ({ id: u.id, name: u.full_name }))}
+              halls={hallOptions.map((h) => ({ id: h.id, name: h.name, type: h.hall_type, capacity: h.capacity }))}
+              busy={allSlots.map((s) => ({ day: s.day_of_week, start: hhmm(s.period_start), end: hhmm(s.period_end), instructor_id: s.instructor_id, hall_id: s.hall_id }))}
+              apply={(s) => insertSlot({ day: s.day, start: s.start, hours: slotHours(s.start, s.end), course_id: s.course_id, session_type: s.session_type, instructor_id: s.instructor_id, hall_id: s.hall_id, sub_group: null })}
+              onDone={() => { logAction("ai_timetable_apply"); qc.invalidateQueries({ queryKey: ["slots"] }); }}
+            />
+          )}
           <input ref={fileRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => { const x = e.target.files?.[0]; if (x) importTemplate(x); e.target.value = ""; }} />
         </div>
       </div>
