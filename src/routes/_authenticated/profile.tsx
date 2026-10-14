@@ -9,6 +9,7 @@ import { meQueryKey, useMe } from "@/lib/me";
 import { useColleges, useDepartments, nameMap } from "@/lib/data";
 import { updateMyProfile } from "@/lib/users.functions";
 import { RANK_LABELS, ROLE_LABELS } from "@/lib/roles";
+import { canChangeOwnPassword } from "@/lib/academic";
 import { Field, PageHeader, Panel, errMsg } from "@/components/app/kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,11 +78,15 @@ function Profile() {
           </form>
         </Panel>
         <Panel title="تغيير كلمة المرور">
+          {!canChangeOwnPassword(me!.role) ? (
+            <p className="flex items-start gap-2 rounded-md bg-muted p-3 text-sm text-muted-foreground"><Lock className="mt-0.5 h-4 w-4 shrink-0" /> تغيير كلمة المرور متاح لحسابات الادمن والتسجيل فقط. راجع موظف التسجيل أو ادمن الكلية لإصدار كلمة مرور جديدة.</p>
+          ) : (
           <form onSubmit={changePw} className="space-y-3">
             <Field label="كلمة المرور الحالية"><Input dir="ltr" type="password" required value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} /></Field>
             <Field label="كلمة المرور الجديدة"><Input dir="ltr" type="password" required value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} /></Field>
             <Button type="submit">تغيير</Button>
           </form>
+          )}
         </Panel>
       </div>
     </div>
