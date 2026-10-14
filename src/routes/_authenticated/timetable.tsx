@@ -531,8 +531,6 @@ function Halls() {
   const qc = useQueryClient();
   const { data: halls = [] } = useHalls();
   const { data: slots = [] } = useSlots();
-  const { data: colleges = [] } = useCourses().data ? { data: [] } : { data: [] };
-  void colleges;
   const top = isTopAdmin(me!.role);
   const myCollege = me!.profile.college_id;
   const [h, setH] = useState({ name: "", capacity: "", hall_type: "classroom", building: "" });
