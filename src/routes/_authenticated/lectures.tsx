@@ -111,7 +111,7 @@ function Lectures() {
           <ul className="grid gap-3 md:grid-cols-2">
             {visible.map((l) => (
               <li key={l.id} className="flex gap-3 rounded-lg border p-4">
-                {(() => { const S = SESSION[l.session_type] ?? SESSION.theory!; const K = l.kind === "lecture" ? S.icon : (KIND_ICONS[l.kind] ?? FileText); return <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${S.cls}`}><K className="h-5 w-5" /></div>; })()}
+                {(() => { const S = SESSION[l.session_type] ?? SESSION["theory"]!; const K = l.kind === "lecture" ? S.icon : (KIND_ICONS[l.kind] ?? FileText); return <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${S.cls}`}><K className="h-5 w-5" /></div>; })()}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <b className="text-foreground">{l.title}</b>

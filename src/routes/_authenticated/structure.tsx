@@ -40,8 +40,8 @@ function Structure() {
   const myCollege = me?.profile.college_id ?? "";
   const visibleColleges = top ? colleges : colleges.filter((c) => c.id === myCollege);
 
-  const [cOpen, setCOpen] = useState<null | { id?: string }>(null);
-  const [dOpen, setDOpen] = useState<null | { id?: string }>(null);
+  const [cOpen, setCOpen] = useState<null | { id?: string | undefined }>(null);
+  const [dOpen, setDOpen] = useState<null | { id?: string | undefined }>(null);
   const [c, setC] = useState(blankCollege);
   const [d, setD] = useState(blankDept);
 
