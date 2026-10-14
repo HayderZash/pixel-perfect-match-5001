@@ -58,3 +58,24 @@ describe("feature access", () => {
   it("disabled feature hides for non-system roles", () =>
     expect(canAccess("instructor", "library", new Set(["library"]))).toBe(false));
 });
+
+import { shiftHours, lectureEnd, remainingCourseHours, canChangeOwnPassword } from "@/lib/academic";
+describe("timetable shifts", () => {
+  it("morning runs 8:30 to 14:30", () => {
+    expect(shiftHours("morning")).toEqual(["08:30", "09:30", "10:30", "11:30", "12:30", "13:30"]);
+  });
+  it("evening runs 14:30 to 20:30", () => {
+    expect(shiftHours("evening")[0]).toBe("14:30");
+    expect(lectureEnd("evening", "18:30", 2)).toBe("20:30");
+    expect(lectureEnd("evening", "19:30", 2)).toBeNull();
+  });
+  it("reports remaining course hours", () => {
+    const r = remainingCourseHours({ theoretical_hours: 4, practical_hours: 2 }, "theory", [{ period_start: "08:30", period_end: "10:30" }]);
+    expect(r.remaining).toBe(2);
+  });
+  it("only admins and registrar change own password", () => {
+    expect(canChangeOwnPassword("registrar")).toBe(true);
+    expect(canChangeOwnPassword("student")).toBe(false);
+    expect(canChangeOwnPassword("instructor")).toBe(false);
+  });
+});
