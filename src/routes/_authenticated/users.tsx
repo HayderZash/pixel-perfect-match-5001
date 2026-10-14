@@ -172,7 +172,7 @@ function UsersPage() {
   async function printSelected(reset: boolean) {
     const ids = [...selected];
     if (!ids.length) return void toast.error("حدد حسابات أولاً");
-    if (reset && !confirm("سيتم توليد كلمات مرور جديدة للحسابات المحددة. متابعة؟")) return;
+    if (reset && !confirm("كلمات المرور لا تُخزَّن بشكل مقروء، لذا ستُولَّد كلمات مرور جديدة للحسابات المحددة وتُطبع على البطاقات. متابعة؟")) return;
     setBusy(true);
     try {
       const res = await reissueCredentials({ data: { ids, resetPassword: reset } });
@@ -255,8 +255,7 @@ function UsersPage() {
         </div>
         <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
           <span className="text-muted-foreground">{rows.length} حساب · محدد {selected.size}</span>
-          <Button size="sm" variant="outline" onClick={() => printSelected(false)} disabled={busy}><Printer className="ml-1 h-4 w-4" /> طباعة رموز QR</Button>
-          <Button size="sm" variant="outline" onClick={() => printSelected(true)} disabled={busy}>طباعة مع كلمات مرور جديدة</Button>
+          <Button size="sm" variant="outline" onClick={() => printSelected(true)} disabled={busy}><Printer className="ml-1 h-4 w-4" /> طباعة بطاقات الدخول (QR + اسم المستخدم + كلمة المرور)</Button>
           <Button size="sm" variant="ghost" onClick={exportList}><Download className="ml-1 h-4 w-4" /> Excel</Button>
         </div>
         {isLoading ? null : rows.length === 0 ? <Empty icon={UsersIcon} text="لا توجد حسابات" /> : (
