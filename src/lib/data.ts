@@ -77,3 +77,10 @@ export async function uploadFile(file: File, folder: string) {
   if (error) throw new Error(error.message);
   return path;
 }
+
+export type Timetable = T<"timetables">;
+export const useTimetables = () =>
+  useQuery({
+    queryKey: ["timetables"],
+    queryFn: async () => must(await supabase.from("timetables").select("*").order("created_at", { ascending: false })),
+  });
