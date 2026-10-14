@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/lib/me";
+import { useBranding } from "@/lib/branding";
 import { ROLE_LABELS, type Feature } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -50,6 +51,7 @@ export const NAV: NavItem[] = [
 
 function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   const { me, can } = useMe();
+  const { data: brand } = useBranding();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -75,7 +77,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
           <GraduationCap className="h-6 w-6" />
         </div>
         <div>
-          <div className="font-display font-extrabold">المنظومة الأكاديمية</div>
+          <div className="font-display font-extrabold">{brand?.university_name && brand.university_name !== "الجامعة" ? brand.university_name : "المنظومة الأكاديمية"}</div>
           <div className="text-xs text-sidebar-foreground/60">{me?.role ? ROLE_LABELS[me.role] : ""}</div>
         </div>
       </div>

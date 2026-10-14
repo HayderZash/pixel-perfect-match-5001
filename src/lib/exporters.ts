@@ -1,5 +1,6 @@
 // Browser-only exporters: printable PDF (via print dialog, proper Arabic shaping) and Excel.
 import * as XLSX from "xlsx";
+import { currentBranding } from "./branding";
 
 const esc = (s: unknown) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -32,7 +33,8 @@ table{width:100%;border-collapse:collapse} th,td{border:1px solid #999;padding:6
 
 export function docHeader(title: string, subtitle = "") {
   const d = new Date().toLocaleDateString("ar-IQ");
-  return `<div class="head"><div><h1>${esc(title)}</h1><h2>${esc(subtitle)}</h2></div><div>التاريخ: ${esc(d)}</div></div>`;
+  const b = currentBranding();
+  return `<div class="head"><div><small>${esc(b.university_name)}${b.academic_year ? ` — العام الدراسي ${esc(b.academic_year)}` : ""}</small><h1>${esc(title)}</h1><h2>${esc(subtitle)}</h2></div><div>التاريخ: ${esc(d)}</div></div>`;
 }
 
 export function htmlTable(headers: string[], rows: (string | number | null | undefined)[][]) {
