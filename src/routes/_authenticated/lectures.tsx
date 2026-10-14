@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Download, ExternalLink, FileText, Plus, Trash2 } from "lucide-react";
+import { BookOpen, ClipboardList, Download, ExternalLink, FileText, FlaskConical, Megaphone, Plus, Presentation, Trash2, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { pageHead } from "@/lib/seo";
@@ -22,6 +22,11 @@ export const Route = createFileRoute("/_authenticated/lectures")({
 });
 
 const KINDS: Record<string, string> = { lecture: "محاضرة", assignment: "واجب", slides: "عرض تقديمي", notice: "إعلان" };
+const KIND_ICONS: Record<string, LucideIcon> = { lecture: FileText, assignment: ClipboardList, slides: Presentation, notice: Megaphone };
+const SESSION: Record<string, { label: string; icon: LucideIcon; cls: string }> = {
+  theory: { label: "نظري", icon: BookOpen, cls: "bg-primary/10 text-primary" },
+  practical: { label: "عملي", icon: FlaskConical, cls: "bg-brass/20 text-brass-foreground" },
+};
 
 function Lectures() {
   const { me } = useMe();
@@ -43,7 +48,7 @@ function Lectures() {
 
   const [courseF, setCourseF] = useState("");
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ course_id: "", title: "", description: "", link_url: "", kind: "lecture" });
+  const [f, setF] = useState({ course_id: "", title: "", description: "", link_url: "", kind: "lecture", session_type: "theory" });
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const courseName = nameMap(courses);
@@ -68,7 +73,7 @@ function Lectures() {
       if (error) throw new Error(error.message);
       toast.success("رُفعت المحاضرة");
       setOpen(false);
-      setF({ course_id: "", title: "", description: "", link_url: "", kind: "lecture" });
+      setF({ course_id: "", title: "", description: "", link_url: "", kind: "lecture", session_type: "theory" });
       setFile(null);
       qc.invalidateQueries({ queryKey: ["lectures"] });
     } catch (err) {
@@ -106,11 +111,11 @@ function Lectures() {
           <ul className="grid gap-3 md:grid-cols-2">
             {visible.map((l) => (
               <li key={l.id} className="flex gap-3 rounded-lg border p-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><FileText className="h-5 w-5" /></div>
+                {(() => { const S = SESSION[l.session_type] ?? SESSION["theory"]!; const K = l.kind === "lecture" ? S.icon : (KIND_ICONS[l.kind] ?? FileText); return <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${S.cls}`}><K className="h-5 w-5" /></div>; })()}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <b className="text-foreground">{l.title}</b>
-                    <Badge variant="brass">{KINDS[l.kind] ?? l.kind}</Badge>
+                    <div className="flex shrink-0 gap-1"><Badge variant={l.session_type === "practical" ? "brass" : "secondary"}>{SESSION[l.session_type]?.label ?? "نظري"}</Badge><Badge variant="outline">{KINDS[l.kind] ?? l.kind}</Badge></div>
                   </div>
                   <div className="text-xs text-muted-foreground">{courseName.get(l.course_id)} · {userName.get(l.instructor_id)} · {new Date(l.created_at).toLocaleDateString("ar-IQ")}</div>
                   {l.description && <p className="mt-1 text-sm text-muted-foreground">{l.description}</p>}
@@ -142,6 +147,13 @@ function Lectures() {
                   {Object.entries(KINDS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </NativeSelect>
               </Field>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(SESSION).map(([k, v]) => (
+                <button type="button" key={k} onClick={() => setF({ ...f, session_type: k })} className={`flex items-center justify-center gap-2 rounded-lg border-2 p-2 font-semibold ${f.session_type === k ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}>
+                  <v.icon className="h-4 w-4" /> محاضرة {v.label}
+                </button>
+              ))}
             </div>
             <Field label="الوصف"><Textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
             <Field label="الملف (PDF، PPT…)"><Input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></Field>

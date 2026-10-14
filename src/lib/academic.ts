@@ -115,3 +115,63 @@ export function todayISO(d = new Date()) {
   const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
   return z.toISOString().slice(0, 10);
 }
+
+// ---------- Timetable shifts ----------
+export type Shift = "morning" | "evening";
+export const SHIFTS: Record<Shift, { label: string; start: string; end: string }> = {
+  morning: { label: "صباحي", start: "08:30", end: "14:30" },
+  evening: { label: "مسائي", start: "14:30", end: "20:30" },
+};
+
+export function minutesToTime(m: number): string {
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+}
+
+/** Hourly start times inside a shift, e.g. morning → 08:30 … 13:30. */
+export function shiftHours(shift: Shift): string[] {
+  const s = timeToMinutes(SHIFTS[shift].start);
+  const e = timeToMinutes(SHIFTS[shift].end);
+  const out: string[] = [];
+  for (let m = s; m < e; m += 60) out.push(minutesToTime(m));
+  return out;
+}
+
+/** End time for a lecture of `hours` starting at `start`, or null if it overflows the shift. */
+export function lectureEnd(shift: Shift, start: string, hours: number): string | null {
+  const end = timeToMinutes(start) + Math.round(hours * 60);
+  if (timeToMinutes(start) < timeToMinutes(SHIFTS[shift].start) || end > timeToMinutes(SHIFTS[shift].end)) return null;
+  return minutesToTime(end);
+}
+
+/** Weekly hours still unscheduled for a course's theory or practical part. */
+export function remainingCourseHours(
+  course: { theoretical_hours: number; practical_hours: number },
+  type: "theory" | "practical",
+  scheduled: { period_start: string; period_end: string }[],
+): { required: number; scheduled: number; remaining: number } {
+  const required = Number(type === "practical" ? course.practical_hours : course.theoretical_hours) || 0;
+  const done = Math.round(scheduled.reduce((a, s) => a + slotHours(s.period_start, s.period_end), 0) * 100) / 100;
+  return { required, scheduled: done, remaining: Math.round((required - done) * 100) / 100 };
+}
+
+export const STUDY_SYSTEMS: Record<string, string> = {
+  bologna: "نظام بولونيا (ECTS)",
+  courses: "النظام الفصلي (الكورسات)",
+  annual: "النظام السنوي",
+};
+export const SHIFT_LABELS: Record<string, string> = { morning: "صباحي", evening: "مسائي", both: "صباحي ومسائي" };
+export const DEGREE_LABELS: Record<string, string> = {
+  diploma: "دبلوم",
+  bachelor: "بكالوريوس",
+  higher_diploma: "دبلوم عالٍ",
+  master: "ماجستير",
+  phd: "دكتوراه",
+};
+export const HALL_TYPES: Record<string, string> = { classroom: "قاعة دراسية", lab: "مختبر", theater: "مدرج", workshop: "ورشة" };
+
+/** Only administrators and registration staff may change their own password. */
+export function canChangeOwnPassword(role: string | null | undefined): boolean {
+  return !!role && ["system_admin", "super_admin", "college_admin", "dept_admin", "registrar"].includes(role);
+}

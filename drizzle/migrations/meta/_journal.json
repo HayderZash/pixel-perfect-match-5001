@@ -29,6 +29,13 @@
       "when": 1791984405662,
       "tag": "0003_permissions_insert",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791986142008,
+      "tag": "0004_richer_structure_timetables",
+      "breakpoints": true
     }
   ]
 }

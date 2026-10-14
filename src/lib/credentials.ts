@@ -16,7 +16,7 @@ export async function printCredentials(list: Credential[], title = "بطاقات
       return `<div class="card"><img src="${img}" alt="QR"/><div>
 <b>${esc(c.full_name)}</b><br/>${esc(ROLE_LABELS[c.role] ?? "")}<br/>
 اسم المستخدم: <span class="mono">${esc(c.username)}</span><br/>
-${c.password ? `كلمة المرور: <span class="mono">${esc(c.password)}</span><br/>` : ""}
+كلمة المرور: <span class="mono">${esc(c.password || "—")}</span><br/>
 <small>امسح الرمز للدخول المباشر</small></div></div>`;
     }),
   );

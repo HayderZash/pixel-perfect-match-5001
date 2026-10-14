@@ -144,20 +144,44 @@ export type Database = {
         Row: {
           code: string | null
           created_at: string
+          dean_name: string | null
+          description: string | null
+          email: string | null
+          established_year: number | null
           id: string
+          location: string | null
           name: string
+          phone: string | null
+          shift: string
+          study_system: string
         }
         Insert: {
           code?: string | null
           created_at?: string
+          dean_name?: string | null
+          description?: string | null
+          email?: string | null
+          established_year?: number | null
           id?: string
+          location?: string | null
           name: string
+          phone?: string | null
+          shift?: string
+          study_system?: string
         }
         Update: {
           code?: string | null
           created_at?: string
+          dean_name?: string | null
+          description?: string | null
+          email?: string | null
+          established_year?: number | null
           id?: string
+          location?: string | null
           name?: string
+          phone?: string | null
+          shift?: string
+          study_system?: string
         }
         Relationships: []
       }
@@ -249,25 +273,46 @@ export type Database = {
           code: string | null
           college_id: string
           created_at: string
+          degree: string
+          description: string | null
+          established_year: number | null
+          head_name: string | null
           id: string
           name: string
+          shift: string
           stages_count: number
+          study_system: string
+          total_credits: number | null
         }
         Insert: {
           code?: string | null
           college_id: string
           created_at?: string
+          degree?: string
+          description?: string | null
+          established_year?: number | null
+          head_name?: string | null
           id?: string
           name: string
+          shift?: string
           stages_count?: number
+          study_system?: string
+          total_credits?: number | null
         }
         Update: {
           code?: string | null
           college_id?: string
           created_at?: string
+          degree?: string
+          description?: string | null
+          established_year?: number | null
+          head_name?: string | null
           id?: string
           name?: string
+          shift?: string
           stages_count?: number
+          study_system?: string
+          total_credits?: number | null
         }
         Relationships: [
           {
@@ -281,23 +326,29 @@ export type Database = {
       }
       halls: {
         Row: {
+          building: string | null
           capacity: number | null
           college_id: string | null
           created_at: string
+          hall_type: string
           id: string
           name: string
         }
         Insert: {
+          building?: string | null
           capacity?: number | null
           college_id?: string | null
           created_at?: string
+          hall_type?: string
           id?: string
           name: string
         }
         Update: {
+          building?: string | null
           capacity?: number | null
           college_id?: string | null
           created_at?: string
+          hall_type?: string
           id?: string
           name?: string
         }
@@ -321,6 +372,7 @@ export type Database = {
           instructor_id: string
           kind: string
           link_url: string | null
+          session_type: string
           title: string
         }
         Insert: {
@@ -332,6 +384,7 @@ export type Database = {
           instructor_id: string
           kind?: string
           link_url?: string | null
+          session_type?: string
           title: string
         }
         Update: {
@@ -343,6 +396,7 @@ export type Database = {
           instructor_id?: string
           kind?: string
           link_url?: string | null
+          session_type?: string
           title?: string
         }
         Relationships: [
@@ -568,6 +622,7 @@ export type Database = {
           session_type: Database["public"]["Enums"]["session_type"]
           stage: number
           sub_group: string | null
+          timetable_id: string | null
         }
         Insert: {
           course_id: string
@@ -583,6 +638,7 @@ export type Database = {
           session_type?: Database["public"]["Enums"]["session_type"]
           stage: number
           sub_group?: string | null
+          timetable_id?: string | null
         }
         Update: {
           course_id?: string
@@ -598,6 +654,7 @@ export type Database = {
           session_type?: Database["public"]["Enums"]["session_type"]
           stage?: number
           sub_group?: string | null
+          timetable_id?: string | null
         }
         Relationships: [
           {
@@ -626,6 +683,60 @@ export type Database = {
             columns: ["instructor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slots_timetable_id_fkey"
+            columns: ["timetable_id"]
+            isOneToOne: false
+            referencedRelation: "timetables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timetables: {
+        Row: {
+          academic_year: string | null
+          created_at: string
+          created_by: string | null
+          department_id: string
+          id: string
+          section: string | null
+          semester: string | null
+          shift: string
+          stage: number
+          title: string | null
+        }
+        Insert: {
+          academic_year?: string | null
+          created_at?: string
+          created_by?: string | null
+          department_id: string
+          id?: string
+          section?: string | null
+          semester?: string | null
+          shift?: string
+          stage: number
+          title?: string | null
+        }
+        Update: {
+          academic_year?: string | null
+          created_at?: string
+          created_by?: string | null
+          department_id?: string
+          id?: string
+          section?: string | null
+          semester?: string | null
+          shift?: string
+          stage?: number
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetables_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
         ]

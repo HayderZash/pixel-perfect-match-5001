@@ -1,13 +1,14 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GraduationCap, LogIn, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/app/kit";
+import { QrScanner } from "@/components/app/QrScanner";
 import { usernameToEmail } from "@/lib/me";
-import { ensureSystemAdmin } from "@/lib/users.functions";
+import { ensureSystemAdmin, qrLogin } from "@/lib/users.functions";
 import campus from "@/assets/campus.jpg";
 
 export const Route = createFileRoute("/auth")({
@@ -29,6 +30,25 @@ function AuthPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [scan, setScan] = useState(false);
+
+  const qrSignIn = useCallback(
+    async (token: string) => {
+      setScan(false);
+      setBusy(true);
+      try {
+        const { token_hash } = await qrLogin({ data: { token } });
+        const { error } = await supabase.auth.verifyOtp({ token_hash, type: "magiclink" });
+        if (error) throw error;
+        navigate({ to: "/dashboard", replace: true });
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "رمز الدخول غير صالح");
+      } finally {
+        setBusy(false);
+      }
+    },
+    [navigate],
+  );
 
   useEffect(() => {
     ensureSystemAdmin().catch(() => {});
@@ -75,10 +95,12 @@ function AuthPage() {
               <LogIn className="ml-2 h-4 w-4" /> {busy ? "جارِ الدخول…" : "دخول"}
             </Button>
           </form>
-          <div className="mt-6 flex items-start gap-3 rounded-lg border bg-muted/50 p-3 text-xs text-muted-foreground">
-            <QrCode className="h-5 w-5 shrink-0 text-primary" />
-            <span>لديك بطاقة دخول؟ امسح رمز QR المطبوع عليها بكاميرا الهاتف للدخول مباشرة.</span>
-          </div>
+          <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />أو<span className="h-px flex-1 bg-border" /></div>
+          <Button type="button" variant="outline" size="lg" className="w-full" disabled={busy} onClick={() => setScan(true)}>
+            <QrCode className="ml-2 h-4 w-4" /> قراءة الباركود
+          </Button>
+          <p className="mt-2 text-center text-xs text-muted-foreground">افتح الكاميرا أو ارفع صورة بطاقة الدخول للدخول مباشرة.</p>
+          <QrScanner open={scan} onOpenChange={setScan} onToken={qrSignIn} />
         </div>
       </div>
       <div className="relative hidden overflow-hidden lg:block">
