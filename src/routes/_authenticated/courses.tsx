@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { BookOpen, Plus, Trash2, UserPlus, X } from "lucide-react";
+import { BookOpen, Pencil, Plus, Trash2, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { pageHead } from "@/lib/seo";
@@ -32,6 +32,7 @@ function Courses() {
   const { data: users = [] } = useUsers();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY);
+  const [editId, setEditId] = useState<string | null>(null);
   const [filterDept, setFilterDept] = useState("");
   const [assignFor, setAssignFor] = useState<string | null>(null);
   const editor = canEditStructure(me?.role);
@@ -55,7 +56,7 @@ function Courses() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    const { error } = await supabase.from("courses").insert({
+    const payload = {
       code: form.code.trim(),
       name: form.name.trim(),
       department_id: form.department_id,
@@ -66,12 +67,16 @@ function Courses() {
       practical_hours: Number(form.practical_hours),
       semester_weeks: Number(form.semester_weeks),
       classification: form.classification as "specialized",
-    });
+    };
+    const { error } = editId
+      ? await supabase.from("courses").update(payload).eq("id", editId)
+      : await supabase.from("courses").insert(payload);
     if (error) return void toast.error(error.message);
-    toast.success("أضيفت المادة");
-    logAction("create_course", { code: form.code });
+    toast.success(editId ? "عُدّلت المادة" : "أضيفت المادة");
+    logAction(editId ? "update_course" : "create_course", { code: form.code });
     setOpen(false);
     setForm(EMPTY);
+    setEditId(null);
     qc.invalidateQueries({ queryKey: ["courses"] });
   }
 
@@ -100,7 +105,7 @@ function Courses() {
       <PageHeader
         title="المواد الدراسية"
         description="الساعات النظرية والعملية والوحدات وفق إطار التعليم العالي."
-        actions={editor && <Button onClick={() => setOpen(true)}><Plus className="ml-1 h-4 w-4" /> مادة جديدة</Button>}
+        actions={editor && <Button onClick={() => { setEditId(null); setForm(EMPTY); setOpen(true); }}><Plus className="ml-1 h-4 w-4" /> مادة جديدة</Button>}
       />
       <Panel>
         {editor && (
@@ -140,6 +145,7 @@ function Courses() {
                     </TableCell>
                     {editor && (
                       <TableCell className="whitespace-nowrap">
+                        <Button variant="ghost" size="icon" aria-label="تعديل" onClick={() => { setEditId(c.id); setForm({ code: c.code, name: c.name, department_id: c.department_id, stage: c.stage, credit_hours: Number(c.credit_hours), ects: c.ects != null ? String(c.ects) : "", theoretical_hours: Number(c.theoretical_hours), practical_hours: Number(c.practical_hours), semester_weeks: Number(c.semester_weeks), classification: c.classification }); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" aria-label="إسناد" onClick={() => setAssignFor(c.id)}><UserPlus className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" aria-label="حذف" onClick={() => del(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                       </TableCell>
@@ -154,7 +160,7 @@ function Courses() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl" dir="rtl">
-          <DialogHeader><DialogTitle>مادة دراسية جديدة</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editId ? "تعديل المادة" : "مادة دراسية جديدة"}</DialogTitle></DialogHeader>
           <form onSubmit={save} className="grid gap-3 sm:grid-cols-2">
             <Field label="رمز المادة"><Input required value={form.code} onChange={set("code")} /></Field>
             <Field label="اسم المادة"><Input required value={form.name} onChange={set("name")} /></Field>
@@ -175,7 +181,7 @@ function Courses() {
                 {Object.entries(CLASSIFICATION_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </NativeSelect>
             </Field>
-            <div className="sm:col-span-2"><Button type="submit" className="w-full">حفظ</Button></div>
+            <div className="sm:col-span-2"><Button type="submit" className="w-full">{editId ? "حفظ التعديلات" : "حفظ"}</Button></div>
           </form>
         </DialogContent>
       </Dialog>
