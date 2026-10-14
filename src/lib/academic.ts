@@ -38,7 +38,7 @@ export function courseTotalHours(c: { theoretical_hours: number; practical_hours
 }
 
 export function timeToMinutes(t: string): number {
-  const [h, m] = t.split(":").map(Number);
+  const [h = 0, m = 0] = t.split(":").map(Number);
   return h * 60 + (m || 0);
 }
 
