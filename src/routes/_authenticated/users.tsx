@@ -228,7 +228,7 @@ function UsersPage() {
         actions={
           creatable.length > 0 && (
             <>
-              <Button onClick={() => setCreateOpen(true)}><Plus className="ml-1 h-4 w-4" /> حساب جديد</Button>
+              <Button onClick={() => { if (!creatable.includes(form.role)) setForm({ ...form, role: creatable[0]! }); setCreateOpen(true); }}><Plus className="ml-1 h-4 w-4" /> حساب جديد</Button>
               <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}><FileUp className="ml-1 h-4 w-4" /> استيراد Excel/CSV</Button>
             </>
           )
