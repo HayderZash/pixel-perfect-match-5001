@@ -492,7 +492,7 @@ function TimetableEditor({ table, onBack }: { table: TT; onBack: () => void }) {
                 </NativeSelect>
               </Field>
               <Field label="من الساعة">
-                <NativeSelect value={f.start} onChange={(e) => setF({ ...f, start: e.target.value })}>
+                <NativeSelect value={f.start} onChange={(e) => { const start = e.target.value; setF({ ...f, start, hours: lectureEnd(shift, start, Number(f.hours)) ? f.hours : "0.5" }); }}>
                   {hours.map((h) => <option key={h} value={h}>{h}</option>)}
                 </NativeSelect>
               </Field>
