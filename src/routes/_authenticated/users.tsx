@@ -8,7 +8,8 @@ import { useMe } from "@/lib/me";
 import { useColleges, useDepartments, useUsers, nameMap, type UserRow } from "@/lib/data";
 import { createUsers, reissueCredentials, updateUser, type NewUserInput } from "@/lib/users.functions";
 import { printCredentials } from "@/lib/credentials";
-import { exportExcel, readSheet } from "@/lib/exporters";
+import { exportExcel, exportLockedTemplate, readSheet } from "@/lib/exporters";
+import { requiredLinks } from "@/lib/roles";
 import {
   CREATABLE_ROLES,
   RANK_LABELS,
@@ -194,7 +195,21 @@ function UsersPage() {
   }
 
   function downloadTemplate() {
-    exportExcel("قالب_استيراد", "قالب", ["الاسم", "اسم المستخدم", "كلمة المرور", "الكلية", "القسم", "المرحلة", "الشعبة", "المجموعة", "الهاتف"], [["علي حسن محمد", "", "", colleges[0]?.name ?? "", depts[0]?.name ?? "", 1, "A", "G1", ""]]);
+    const need = requiredLinks(importRole);
+    const collegeOpts = scoped ? colleges.filter((c) => c.id === me!.profile.college_id) : colleges;
+    const deptOpts = depts.filter((d) => collegeOpts.some((c) => c.id === d.college_id));
+    const cols = [
+      { header: "الاسم" },
+      { header: "اسم المستخدم" },
+      { header: "كلمة المرور" },
+      { header: "الكلية", options: collegeOpts.map((c) => c.name) },
+      { header: "القسم", options: deptOpts.map((d) => d.name) },
+      { header: "المرحلة", options: ["1", "2", "3", "4", "5", "6"] },
+      { header: "الشعبة" },
+      { header: "المجموعة" },
+      { header: "الهاتف" },
+    ].filter((c) => (c.header === "القسم" ? need.department || importRole === "instructor" : true));
+    exportLockedTemplate(`قالب_استيراد_${ROLE_LABELS[importRole]}`, "قالب", cols);
   }
 
   const toggle = (id: string) => {
@@ -213,7 +228,7 @@ function UsersPage() {
         actions={
           creatable.length > 0 && (
             <>
-              <Button onClick={() => setCreateOpen(true)}><Plus className="ml-1 h-4 w-4" /> حساب جديد</Button>
+              <Button onClick={() => { if (!creatable.includes(form.role)) setForm({ ...form, role: creatable[0]! }); setCreateOpen(true); }}><Plus className="ml-1 h-4 w-4" /> حساب جديد</Button>
               <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={busy}><FileUp className="ml-1 h-4 w-4" /> استيراد Excel/CSV</Button>
             </>
           )
@@ -311,17 +326,17 @@ function UsersPage() {
                 {creatable.map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
               </NativeSelect>
             </Field>
-            {!scoped && (
-              <Field label="الكلية">
-                <NativeSelect value={form.college_id} onChange={(e) => setForm({ ...form, college_id: e.target.value, department_id: "" })}>
+            {!scoped && requiredLinks(form.role).college && (
+              <Field label="الكلية (مطلوبة)">
+                <NativeSelect required value={form.college_id} onChange={(e) => setForm({ ...form, college_id: e.target.value, department_id: "" })}>
                   <option value="">—</option>
                   {colleges.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </NativeSelect>
               </Field>
             )}
-            {form.role !== "college_admin" && form.role !== "super_admin" && form.role !== "registrar" && (
-              <Field label="القسم">
-                <NativeSelect value={form.department_id} onChange={(e) => setForm({ ...form, department_id: e.target.value })}>
+            {(requiredLinks(form.role).department || form.role === "instructor") && (
+              <Field label={requiredLinks(form.role).department ? "القسم (مطلوب)" : "القسم"}>
+                <NativeSelect required={requiredLinks(form.role).department} value={form.department_id} onChange={(e) => setForm({ ...form, department_id: e.target.value })}>
                   <option value="">—</option>
                   {deptOptions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </NativeSelect>

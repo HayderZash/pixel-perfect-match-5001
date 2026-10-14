@@ -35,9 +35,13 @@ describe("account creation", () => {
     expect(canCreateRole("system_admin", "super_admin")).toBe(true);
     expect(canCreateRole("super_admin", "super_admin")).toBe(false);
   });
-  it("college admin creates only instructors and students", () => {
+  it("students are created only by registrar and top admins", () => {
+    expect(canCreateRole("registrar", "student")).toBe(true);
+    expect(canCreateRole("super_admin", "student")).toBe(true);
+    expect(canCreateRole("college_admin", "student")).toBe(false);
+  });
+  it("college admin creates instructors only", () => {
     expect(canCreateRole("college_admin", "instructor")).toBe(true);
-    expect(canCreateRole("college_admin", "student")).toBe(true);
     expect(canCreateRole("college_admin", "registrar")).toBe(false);
   });
   it("department admin cannot create accounts", () => {
@@ -61,8 +65,11 @@ describe("feature access", () => {
 
 import { shiftHours, lectureEnd, remainingCourseHours, canChangeOwnPassword } from "@/lib/academic";
 describe("timetable shifts", () => {
-  it("morning runs 8:30 to 14:30", () => {
-    expect(shiftHours("morning")).toEqual(["08:30", "09:30", "10:30", "11:30", "12:30", "13:30"]);
+  it("morning runs 8:30 to 14:30 in half-hour steps", () => {
+    const h = shiftHours("morning");
+    expect(h.slice(0, 3)).toEqual(["08:30", "09:00", "09:30"]);
+    expect(h.at(-1)).toBe("14:00");
+    expect(h.length).toBe(12);
   });
   it("evening runs 14:30 to 20:30", () => {
     expect(shiftHours("evening")[0]).toBe("14:30");
@@ -78,4 +85,13 @@ describe("timetable shifts", () => {
     expect(canChangeOwnPassword("student")).toBe(false);
     expect(canChangeOwnPassword("instructor")).toBe(false);
   });
+});
+
+import { requiredLinks } from "@/lib/roles";
+describe("account links", () => {
+  it("college admin and registrar need a college", () => {
+    expect(requiredLinks("college_admin")).toEqual({ college: true, department: false });
+    expect(requiredLinks("registrar")).toEqual({ college: true, department: false });
+  });
+  it("department admin needs college and department", () => expect(requiredLinks("dept_admin")).toEqual({ college: true, department: true }));
 });

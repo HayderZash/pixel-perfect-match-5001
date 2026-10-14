@@ -62,3 +62,44 @@ export async function readSheet(file: File): Promise<Record<string, unknown>[]> 
   if (!ws) return [];
   return XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
 }
+
+export type TemplateColumn = { header: string; options?: string[]; width?: number };
+
+/**
+ * Excel template whose list columns only accept values that exist in the system
+ * (dropdown + rejecting validation, backed by a hidden, protected lists sheet).
+ */
+export async function exportLockedTemplate(filename: string, sheetName: string, columns: TemplateColumn[], rows: unknown[][] = [], maxRows = 500) {
+  const ExcelJS = (await import("exceljs")).default;
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet(sheetName, { views: [{ rightToLeft: true, state: "frozen", ySplit: 1 }] });
+  const lists = wb.addWorksheet("القوائم", { state: "veryHidden" });
+  ws.columns = columns.map((c) => ({ header: c.header, width: c.width ?? 22 }));
+  ws.getRow(1).font = { bold: true };
+  for (const r of rows) ws.addRow(r);
+  columns.forEach((c, i) => {
+    if (!c.options) return;
+    const opts = c.options.length ? c.options : ["—"];
+    opts.forEach((o, j) => (lists.getCell(j + 1, i + 1).value = o));
+    const col = lists.getColumn(i + 1).letter;
+    for (let r = 2; r <= maxRows + 1; r++) {
+      ws.getCell(r, i + 1).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [`'القوائم'!$${col}$1:$${col}$${opts.length}`],
+        showErrorMessage: true,
+        errorStyle: "stop",
+        errorTitle: "قيمة غير مسموحة",
+        error: "اختر قيمة من القائمة فقط — القيم مأخوذة من بيانات النظام",
+      };
+    }
+  });
+  await lists.protect(crypto.randomUUID(), {});
+  const buf = await wb.xlsx.writeBuffer();
+  const url = URL.createObjectURL(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename.endsWith(".xlsx") ? filename : `${filename}.xlsx`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}

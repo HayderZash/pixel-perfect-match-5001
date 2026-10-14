@@ -129,12 +129,12 @@ export function minutesToTime(m: number): string {
   return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }
 
-/** Hourly start times inside a shift, e.g. morning → 08:30 … 13:30. */
+/** Half-hour start times inside a shift, e.g. morning → 08:30, 09:00 … 14:00. */
 export function shiftHours(shift: Shift): string[] {
   const s = timeToMinutes(SHIFTS[shift].start);
   const e = timeToMinutes(SHIFTS[shift].end);
   const out: string[] = [];
-  for (let m = s; m < e; m += 60) out.push(minutesToTime(m));
+  for (let m = s; m < e; m += 30) out.push(minutesToTime(m));
   return out;
 }
 

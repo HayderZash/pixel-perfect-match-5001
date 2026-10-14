@@ -6,6 +6,7 @@ import {
   canCreateRole,
   canManageUser,
   isCollegeScoped,
+  requiredLinks,
   ROLE_PREFIX,
   type AcademicRank,
   type AppRole,
@@ -110,6 +111,13 @@ export const createUsers = createServerFn({ method: "POST" })
         if (!canCreateRole(caller.role, u.role)) throw new Error("لا تملك صلاحية إنشاء هذا النوع");
         const college_id = caller.role && isCollegeScoped(caller.role) ? caller.college_id : (u.college_id ?? null);
         if (caller.role && isCollegeScoped(caller.role) && !college_id) throw new Error("حسابك غير مرتبط بكلية");
+        const need = requiredLinks(u.role);
+        if (need.college && !college_id) throw new Error("يجب اختيار الكلية لهذا الحساب");
+        if (need.department && !u.department_id) throw new Error("يجب اختيار القسم لهذا الحساب");
+        if (u.department_id) {
+          const { data: d } = await supabaseAdmin.from("departments").select("college_id").eq("id", u.department_id).maybeSingle();
+          if (!d || d.college_id !== college_id) throw new Error("القسم لا يتبع الكلية المختارة");
+        }
         let username = String(u.username ?? "").trim().toLowerCase();
         if (username && !/^[a-z0-9._-]{3,40}$/.test(username)) throw new Error("اسم المستخدم: أحرف إنجليزية وأرقام فقط");
         if (!username) username = `${ROLE_PREFIX[u.role]}${randomString(6, "0123456789")}`;
