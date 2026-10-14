@@ -324,11 +324,11 @@ function TimetableEditor({ table, onBack }: { table: TT; onBack: () => void }) {
   }
 
   function downloadTemplate() {
-    const rows: unknown[][] = slots.map((s) => [WEEK_DAYS.find((d) => d.value === s.day_of_week)?.label ?? "", hhmm(s.period_start), String(slotHours(s.period_start, s.period_end)), courses.find((x) => x.id === s.course_id)?.code ?? "", typeLabel(s.session_type), s.sub_group ?? "", users.find((u) => u.id === s.instructor_id)?.username ?? "", hName.get(s.hall_id ?? "") ?? ""]);
+    const rows: unknown[][] = slots.map((s) => [WEEK_DAYS.find((d) => d.value === s.day_of_week)?.label ?? "", hhmm(s.period_start), hhmm(s.period_end), courses.find((x) => x.id === s.course_id)?.code ?? "", typeLabel(s.session_type), s.sub_group ?? "", users.find((u) => u.id === s.instructor_id)?.username ?? "", hName.get(s.hall_id ?? "") ?? ""]);
     exportLockedTemplate(`قالب-جدول-${dept?.name ?? ""}-م${table.stage}-${SHIFTS[shift].label}`, "الجدول", [
       { header: "اليوم", options: WEEK_DAYS.map((d) => d.label) },
       { header: "من الساعة", options: hours },
-      { header: "عدد الساعات", options: ["0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"] },
+      { header: "إلى الساعة", options: [...hours.slice(1), SHIFTS[shift].end] },
       { header: "رمز المادة", options: courseOptions.map((c) => c.code) },
       { header: "النوع (نظري/عملي)", options: ["نظري", "عملي"] },
       { header: "المجموعة" },
@@ -355,7 +355,11 @@ function TimetableEditor({ table, onBack }: { table: TT; onBack: () => void }) {
         const hall = hallOptions.find((h) => h.name === v("القاعة"));
         let start = v("من الساعة");
         if (/^\d+(\.\d+)?$/.test(start)) { const m = Math.round(Number(start) * 24 * 60); start = `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`; }
-        await insertSlot({ day, start, hours: Number(v("عدد الساعات")) || 1, course_id: course.id, session_type: type, instructor_id: inst?.id ?? null, hall_id: hall?.id ?? null, sub_group: v("المجموعة") || null });
+        let endT = v("إلى الساعة");
+        if (/^\d+(\.\d+)?$/.test(endT)) { const m = Math.round(Number(endT) * 24 * 60); endT = `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`; }
+        const dur = (timeToMinutes(endT) - timeToMinutes(start)) / 60;
+        if (!(dur > 0)) throw new Error("وقت الانتهاء يجب أن يكون بعد وقت البدء");
+        await insertSlot({ day, start, hours: dur, course_id: course.id, session_type: type, instructor_id: inst?.id ?? null, hall_id: hall?.id ?? null, sub_group: v("المجموعة") || null });
         touched.add(`${course.id}|${type}`);
         ok++;
       } catch (e) {
@@ -492,9 +496,9 @@ function TimetableEditor({ table, onBack }: { table: TT; onBack: () => void }) {
                   {hours.map((h) => <option key={h} value={h}>{h}</option>)}
                 </NativeSelect>
               </Field>
-              <Field label="عدد الساعات">
+              <Field label="إلى الساعة">
                 <NativeSelect value={f.hours} onChange={(e) => setF({ ...f, hours: e.target.value })}>
-                  {[0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6].filter((n) => lectureEnd(shift, f.start, n)).map((n) => <option key={n} value={n}>{n} — حتى {lectureEnd(shift, f.start, n)}</option>)}
+                  {Array.from({ length: 12 }, (_, i) => (i + 1) / 2).filter((n) => lectureEnd(shift, f.start, n)).map((n) => <option key={n} value={n}>{lectureEnd(shift, f.start, n)} ({n} ساعة)</option>)}
                 </NativeSelect>
               </Field>
               <Field label="المجموعة (G1، G2…)"><Input value={f.sub_group} onChange={(e) => setF({ ...f, sub_group: e.target.value.toUpperCase() })} /></Field>
