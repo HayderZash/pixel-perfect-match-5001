@@ -61,7 +61,7 @@ export const suggestTimetable = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ slots: AiSlot[]; summary: string; error?: string }> => {
     const { data: role } = await context.supabase.rpc("user_role", { _user_id: context.userId });
     if (!EDITORS.includes(String(role))) return { slots: [], summary: "", error: "لا تملك صلاحية تعديل الجداول" };
-    const key = process.env.LOVABLE_API_KEY;
+    const key = process.env['LOVABLE_API_KEY'];
     if (!key) return { slots: [], summary: "", error: "خدمة الذكاء الاصطناعي غير مهيأة" };
 
     const instructions = `أنت مساعد جدولة جامعية. اقترح محاضرات لجدول أسبوعي واحد.
