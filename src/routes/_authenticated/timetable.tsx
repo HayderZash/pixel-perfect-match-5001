@@ -10,7 +10,7 @@ import { useMe } from "@/lib/me";
 import { useCourses, useDepartments, useHalls, useSlots, useTimetables, useUsers, nameMap, logAction, type Slot, type Timetable as TT } from "@/lib/data";
 import { HALL_TYPES, SHIFTS, WEEK_DAYS, lectureEnd, remainingCourseHours, shiftHours, slotHours, studentMatchesSlot, timeToMinutes, type Shift } from "@/lib/academic";
 import { canEditStructure, isTopAdmin } from "@/lib/roles";
-import { docHeader, esc, printDocument } from "@/lib/exporters";
+import { docHeader, esc, exportLockedTemplate, printDocument } from "@/lib/exporters";
 import { Empty, Field, NativeSelect, PageHeader, Panel, errMsg } from "@/components/app/kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -324,22 +324,17 @@ function TimetableEditor({ table, onBack }: { table: TT; onBack: () => void }) {
   }
 
   function downloadTemplate() {
-    const rows = [["اليوم", "من الساعة", "عدد الساعات", "رمز المادة", "النوع (نظري/عملي)", "المجموعة", "اسم مستخدم التدريسي", "القاعة"]];
-    for (const s of slots) {
-      const c = courses.find((x) => x.id === s.course_id);
-      rows.push([WEEK_DAYS.find((d) => d.value === s.day_of_week)?.label ?? "", hhmm(s.period_start), String(slotHours(s.period_start, s.period_end)), c?.code ?? "", typeLabel(s.session_type), s.sub_group ?? "", users.find((u) => u.id === s.instructor_id)?.username ?? "", hName.get(s.hall_id ?? "") ?? ""]);
-    }
-    if (!slots.length) rows.push([WEEK_DAYS[0]!.label, hours[0]!, "2", courseOptions[0]?.code ?? "CS101", "نظري", "", "", hallOptions[0]?.name ?? ""]);
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    ws["!cols"] = rows[0]!.map(() => ({ wch: 18 }));
-    XLSX.utils.book_append_sheet(wb, ws, "الجدول");
-    const ref = [["الأيام", "أوقات البدء المسموحة", "رموز المواد", "القاعات"]];
-    const n = Math.max(WEEK_DAYS.length, hours.length, courseOptions.length, hallOptions.length);
-    for (let i = 0; i < n; i++) ref.push([WEEK_DAYS[i]?.label ?? "", hours[i] ?? "", courseOptions[i] ? `${courseOptions[i]!.code} — ${courseOptions[i]!.name}` : "", hallOptions[i]?.name ?? ""]);
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ref), "مرجع");
-    wb.Workbook = { Views: [{ RTL: true }] };
-    XLSX.writeFile(wb, `قالب-جدول-${dept?.name ?? ""}-م${table.stage}-${SHIFTS[shift].label}.xlsx`);
+    const rows: unknown[][] = slots.map((s) => [WEEK_DAYS.find((d) => d.value === s.day_of_week)?.label ?? "", hhmm(s.period_start), String(slotHours(s.period_start, s.period_end)), courses.find((x) => x.id === s.course_id)?.code ?? "", typeLabel(s.session_type), s.sub_group ?? "", users.find((u) => u.id === s.instructor_id)?.username ?? "", hName.get(s.hall_id ?? "") ?? ""]);
+    exportLockedTemplate(`قالب-جدول-${dept?.name ?? ""}-م${table.stage}-${SHIFTS[shift].label}`, "الجدول", [
+      { header: "اليوم", options: WEEK_DAYS.map((d) => d.label) },
+      { header: "من الساعة", options: hours },
+      { header: "عدد الساعات", options: ["0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"] },
+      { header: "رمز المادة", options: courseOptions.map((c) => c.code) },
+      { header: "النوع (نظري/عملي)", options: ["نظري", "عملي"] },
+      { header: "المجموعة" },
+      { header: "اسم مستخدم التدريسي", options: instructorOptions.map((u) => u.username) },
+      { header: "القاعة", options: hallOptions.map((h) => h.name) },
+    ], rows);
   }
 
   async function importTemplate(file: File) {
@@ -419,7 +414,7 @@ function TimetableEditor({ table, onBack }: { table: TT; onBack: () => void }) {
                     {WEEK_DAYS.map((d) => {
                       const here = startsAt(d.value, h);
                       return (
-                        <td key={d.value} className={`group h-20 border p-1 align-top ${covered(d.value, h) && !here.length ? "bg-muted/40" : ""}`}>
+                        <td key={d.value} className={`group h-12 border p-1 align-top ${covered(d.value, h) && !here.length ? "bg-muted/40" : ""}`}>
                           {here.map((s) => (
                             <div key={s.id} className={`mb-1 rounded-md border-r-4 p-1.5 ${s.session_type === "practical" ? "border-brass bg-brass/15" : "border-primary bg-primary/10"}`}>
                               <div className="flex items-start justify-between gap-1">
@@ -499,7 +494,7 @@ function TimetableEditor({ table, onBack }: { table: TT; onBack: () => void }) {
               </Field>
               <Field label="عدد الساعات">
                 <NativeSelect value={f.hours} onChange={(e) => setF({ ...f, hours: e.target.value })}>
-                  {[1, 1.5, 2, 3, 4, 5, 6].filter((n) => lectureEnd(shift, f.start, n)).map((n) => <option key={n} value={n}>{n} — حتى {lectureEnd(shift, f.start, n)}</option>)}
+                  {[0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6].filter((n) => lectureEnd(shift, f.start, n)).map((n) => <option key={n} value={n}>{n} — حتى {lectureEnd(shift, f.start, n)}</option>)}
                 </NativeSelect>
               </Field>
               <Field label="المجموعة (G1، G2…)"><Input value={f.sub_group} onChange={(e) => setF({ ...f, sub_group: e.target.value.toUpperCase() })} /></Field>

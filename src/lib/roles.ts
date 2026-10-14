@@ -60,7 +60,7 @@ export const ROLE_PREFIX: Record<AppRole, string> = {
 export const CREATABLE_ROLES: Record<AppRole, AppRole[]> = {
   system_admin: ["super_admin", "college_admin", "dept_admin", "registrar", "instructor", "student"],
   super_admin: ["college_admin", "dept_admin", "registrar", "instructor", "student"],
-  college_admin: ["instructor", "student"],
+  college_admin: ["instructor"],
   registrar: ["student"],
   dept_admin: [],
   instructor: [],
@@ -70,6 +70,14 @@ export const CREATABLE_ROLES: Record<AppRole, AppRole[]> = {
 export function canCreateRole(caller: AppRole | null | undefined, target: AppRole): boolean {
   if (!caller) return false;
   return CREATABLE_ROLES[caller].includes(target);
+}
+
+/** Required organisational links per created role: student accounts come only from registrar or top admins. */
+export function requiredLinks(role: AppRole): { college: boolean; department: boolean } {
+  if (role === "college_admin" || role === "registrar") return { college: true, department: false };
+  if (role === "dept_admin" || role === "student") return { college: true, department: true };
+  if (role === "instructor") return { college: true, department: false };
+  return { college: false, department: false };
 }
 
 /** Roles that are scoped to (and forced into) their own college when creating/managing users. */
