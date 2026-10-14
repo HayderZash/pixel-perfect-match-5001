@@ -59,8 +59,8 @@ function Lectures() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (!file && !f.link_url) return toast.error("أرفق ملفاً أو رابطاً");
-    if (file && file.size > 50 * 1024 * 1024) return toast.error("الحد الأقصى 50 ميغابايت");
+    if (!file && !f.link_url) return void toast.error("أرفق ملفاً أو رابطاً");
+    if (file && file.size > 50 * 1024 * 1024) return void toast.error("الحد الأقصى 50 ميغابايت");
     setBusy(true);
     try {
       const file_path = file ? await uploadFile(file, "lectures") : null;

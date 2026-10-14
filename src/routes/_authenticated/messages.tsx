@@ -100,7 +100,7 @@ function Messages() {
   async function send(e: React.FormEvent) {
     e.preventDefault();
     const targets = to === "__group" ? groupTargets.map((u) => u.id) : to ? [to] : [];
-    if (!targets.length) return toast.error("اختر المستلم");
+    if (!targets.length) return void toast.error("اختر المستلم");
     setBusy(true);
     try {
       const attachment_path = file ? await uploadFile(file, "attachments") : null;

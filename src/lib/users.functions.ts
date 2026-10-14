@@ -194,7 +194,7 @@ export const updateUser = createServerFn({ method: "POST" })
     for (const [k, v] of Object.entries(rest)) if (v !== undefined) patch[k] = v === "" ? null : v;
     if (caller.role && isCollegeScoped(caller.role)) patch["college_id"] = caller.college_id;
     if (Object.keys(patch).length) {
-      const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", id);
+      const { error } = await supabaseAdmin.from("profiles").update(patch as never).eq("id", id);
       if (error) throw new Error(error.message);
     }
     if (new_password) {
@@ -281,7 +281,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     if (data.phone !== undefined) patch["phone"] = data.phone?.slice(0, 30) || null;
     if (data.avatar_url !== undefined) patch["avatar_url"] = data.avatar_url?.slice(0, 500) || null;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", context.userId);
+    const { error } = await supabaseAdmin.from("profiles").update(patch as never).eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

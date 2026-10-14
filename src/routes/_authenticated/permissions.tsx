@@ -31,7 +31,7 @@ function Permissions() {
 
   async function toggle(role: AppRole, feature: Feature, value: boolean) {
     const { error } = await supabase.from("role_permissions").upsert({ role, feature, enabled: value }, { onConflict: "role,feature" });
-    if (error) return toast.error(error.message);
+    if (error) return void toast.error(error.message);
     logAction("toggle_permission", { role, feature, value });
     qc.invalidateQueries({ queryKey: ["role_permissions"] });
     qc.invalidateQueries({ queryKey: meQueryKey });

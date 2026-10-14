@@ -38,7 +38,7 @@ function Structure() {
 
   async function run(p: PromiseLike<{ error: { message: string } | null }>, ok: string, key: string, action: string) {
     const { error } = await p;
-    if (error) return toast.error(errMsg(new Error(error.message)));
+    if (error) return void toast.error(errMsg(new Error(error.message)));
     toast.success(ok);
     qc.invalidateQueries({ queryKey: [key] });
     logAction(action);
@@ -86,7 +86,7 @@ function Structure() {
             onSubmit={(e) => {
               e.preventDefault();
               const cid = top ? dept.college_id : myCollege;
-              if (!cid) return toast.error("اختر الكلية");
+              if (!cid) return void toast.error("اختر الكلية");
               run(supabase.from("departments").insert({ name: dept.name.trim(), code: dept.code || null, college_id: cid, stages_count: Number(dept.stages_count) || 4 }), "أضيف القسم", "departments", "create_department");
               setDept({ ...dept, name: "", code: "" });
             }}

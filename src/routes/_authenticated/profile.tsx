@@ -41,9 +41,9 @@ function Profile() {
 
   async function changePw(e: React.FormEvent) {
     e.preventDefault();
-    if (pw.next.length < 6) return toast.error("كلمة المرور 6 أحرف على الأقل");
+    if (pw.next.length < 6) return void toast.error("كلمة المرور 6 أحرف على الأقل");
     const { error } = await supabase.auth.updateUser({ password: pw.next, current_password: pw.current } as never);
-    if (error) return toast.error(error.message.includes("current") ? "كلمة المرور الحالية غير صحيحة" : error.message);
+    if (error) return void toast.error(error.message.includes("current") ? "كلمة المرور الحالية غير صحيحة" : error.message);
     toast.success("تم تغيير كلمة المرور");
     setPw({ current: "", next: "" });
   }

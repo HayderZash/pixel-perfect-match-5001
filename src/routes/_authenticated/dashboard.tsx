@@ -151,7 +151,7 @@ function InstructorDash() {
         <StatCard label="محاضرات اليوم" value={todays.length} icon={CalendarDays} />
         <StatCard label="الشعب المسندة" value={mine.length} icon={BookOpen} tone="brass" />
         <StatCard label="عدد الطلبة" value={studentCount} icon={GraduationCap} tone="success" />
-        <StatCard label="النصاب الأسبوعي" value={`${load.total} س`} hint={load.quota ? `من ${load.quota} ساعة` : undefined} icon={ClipboardCheck} />
+        <StatCard label="النصاب الأسبوعي" value={`${load.total} س`} {...(load.quota ? { hint: `من ${load.quota} ساعة` } : {})} icon={ClipboardCheck} />
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Panel title={`محاضرات اليوم — ${DAY_LABEL[today]}`} actions={<Link to="/attendance" className="text-sm font-semibold text-primary">تسجيل الحضور</Link>}>

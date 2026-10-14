@@ -46,7 +46,7 @@ function Reports() {
 
   async function attendanceSheet(kind: "pdf" | "excel") {
     const c = courses.find((x) => x.id === courseId);
-    if (!c) return toast.error("اختر المادة");
+    if (!c) return void toast.error("اختر المادة");
     try {
       const { data: sessions } = await supabase.from("attendance_sessions").select("id, session_date, hours").eq("course_id", c.id).order("session_date");
       const ids = (sessions ?? []).map((s) => s.id);
@@ -74,7 +74,7 @@ function Reports() {
   }
 
   function rosterExport(kind: "pdf" | "excel") {
-    if (!dept) return toast.error("اختر القسم");
+    if (!dept) return void toast.error("اختر القسم");
     const list = roster(dept, Number(stage), section || undefined);
     const headers = ["ت", "اسم الطالب", "اسم المستخدم", "الشعبة", "المجموعة", "الهاتف"];
     const rows = list.map((s, i) => [i + 1, s.full_name, s.username, s.section ?? "", s.sub_group ?? "", s.phone ?? ""]);

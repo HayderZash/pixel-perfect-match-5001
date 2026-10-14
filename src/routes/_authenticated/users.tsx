@@ -171,7 +171,7 @@ function UsersPage() {
 
   async function printSelected(reset: boolean) {
     const ids = [...selected];
-    if (!ids.length) return toast.error("حدد حسابات أولاً");
+    if (!ids.length) return void toast.error("حدد حسابات أولاً");
     if (reset && !confirm("سيتم توليد كلمات مرور جديدة للحسابات المحددة. متابعة؟")) return;
     setBusy(true);
     try {

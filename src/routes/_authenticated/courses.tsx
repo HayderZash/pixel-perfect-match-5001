@@ -67,7 +67,7 @@ function Courses() {
       semester_weeks: Number(form.semester_weeks),
       classification: form.classification as "specialized",
     });
-    if (error) return toast.error(error.message);
+    if (error) return void toast.error(error.message);
     toast.success("أضيفت المادة");
     logAction("create_course", { code: form.code });
     setOpen(false);
@@ -78,13 +78,13 @@ function Courses() {
   async function del(id: string) {
     if (!confirm("حذف المادة وكل ما يرتبط بها؟")) return;
     const { error } = await supabase.from("courses").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return void toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["courses"] });
   }
 
   async function assign(courseId: string, instructorId: string) {
     const { error } = await supabase.from("course_instructors").insert({ course_id: courseId, instructor_id: instructorId });
-    if (error) return toast.error(error.message.includes("duplicate") ? "مسند مسبقاً" : error.message);
+    if (error) return void toast.error(error.message.includes("duplicate") ? "مسند مسبقاً" : error.message);
     qc.invalidateQueries({ queryKey: ["course_instructors"] });
   }
   async function unassign(courseId: string, instructorId: string) {

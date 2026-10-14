@@ -75,7 +75,7 @@ function Timetable() {
       hall_id: f.hall_id || null,
       session_type: f.session_type as "theory",
     });
-    if (error) return toast.error(error.message);
+    if (error) return void toast.error(error.message);
     toast.success("أضيفت المحاضرة للجدول");
     logAction("create_slot");
     setOpen(false);
@@ -85,7 +85,7 @@ function Timetable() {
   async function remove(id: string) {
     if (!confirm("حذف المحاضرة من الجدول؟")) return;
     const { error } = await supabase.from("timetable_slots").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return void toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["slots"] });
   }
 
