@@ -16,10 +16,14 @@ import { Route as QrRouteImport } from './routes/qr'
 import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authenticated/attendance'
 import { Route as AuthenticatedCoursesRouteImport } from './routes/_authenticated/courses'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedLecturesRouteImport } from './routes/_authenticated/lectures'
+import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedStructureRouteImport } from './routes/_authenticated/structure'
 import { Route as AuthenticatedTimetableRouteImport } from './routes/_authenticated/timetable'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedWarningsRouteImport } from './routes/_authenticated/warnings'
+import { Route as AuthenticatedWorkloadRouteImport } from './routes/_authenticated/workload'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -55,6 +59,21 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLecturesRoute = AuthenticatedLecturesRouteImport.update({
+  id: '/lectures',
+  path: '/lectures',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedStructureRoute = AuthenticatedStructureRouteImport.update({
   id: '/structure',
   path: '/structure',
@@ -75,6 +94,11 @@ const AuthenticatedWarningsRoute = AuthenticatedWarningsRouteImport.update({
   path: '/warnings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWorkloadRoute = AuthenticatedWorkloadRouteImport.update({
+  id: '/workload',
+  path: '/workload',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -83,10 +107,14 @@ export interface FileRoutesByFullPath {
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/courses': typeof AuthenticatedCoursesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/lectures': typeof AuthenticatedLecturesRoute
+  '/library': typeof AuthenticatedLibraryRoute
+  '/messages': typeof AuthenticatedMessagesRoute
   '/structure': typeof AuthenticatedStructureRoute
   '/timetable': typeof AuthenticatedTimetableRoute
   '/users': typeof AuthenticatedUsersRoute
   '/warnings': typeof AuthenticatedWarningsRoute
+  '/workload': typeof AuthenticatedWorkloadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -95,10 +123,14 @@ export interface FileRoutesByTo {
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/courses': typeof AuthenticatedCoursesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/lectures': typeof AuthenticatedLecturesRoute
+  '/library': typeof AuthenticatedLibraryRoute
+  '/messages': typeof AuthenticatedMessagesRoute
   '/structure': typeof AuthenticatedStructureRoute
   '/timetable': typeof AuthenticatedTimetableRoute
   '/users': typeof AuthenticatedUsersRoute
   '/warnings': typeof AuthenticatedWarningsRoute
+  '/workload': typeof AuthenticatedWorkloadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -109,10 +141,14 @@ export interface FileRoutesById {
   '/_authenticated/attendance': typeof AuthenticatedAttendanceRoute
   '/_authenticated/courses': typeof AuthenticatedCoursesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/lectures': typeof AuthenticatedLecturesRoute
+  '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/structure': typeof AuthenticatedStructureRoute
   '/_authenticated/timetable': typeof AuthenticatedTimetableRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/warnings': typeof AuthenticatedWarningsRoute
+  '/_authenticated/workload': typeof AuthenticatedWorkloadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,10 +159,14 @@ export interface FileRouteTypes {
     | '/attendance'
     | '/courses'
     | '/dashboard'
+    | '/lectures'
+    | '/library'
+    | '/messages'
     | '/structure'
     | '/timetable'
     | '/users'
     | '/warnings'
+    | '/workload'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -135,10 +175,14 @@ export interface FileRouteTypes {
     | '/attendance'
     | '/courses'
     | '/dashboard'
+    | '/lectures'
+    | '/library'
+    | '/messages'
     | '/structure'
     | '/timetable'
     | '/users'
     | '/warnings'
+    | '/workload'
   id:
     | '__root__'
     | '/'
@@ -148,10 +192,14 @@ export interface FileRouteTypes {
     | '/_authenticated/attendance'
     | '/_authenticated/courses'
     | '/_authenticated/dashboard'
+    | '/_authenticated/lectures'
+    | '/_authenticated/library'
+    | '/_authenticated/messages'
     | '/_authenticated/structure'
     | '/_authenticated/timetable'
     | '/_authenticated/users'
     | '/_authenticated/warnings'
+    | '/_authenticated/workload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -212,6 +260,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/lectures': {
+      id: '/_authenticated/lectures'
+      path: '/lectures'
+      fullPath: '/lectures'
+      preLoaderRoute: typeof AuthenticatedLecturesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/library': {
+      id: '/_authenticated/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AuthenticatedLibraryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/structure': {
       id: '/_authenticated/structure'
       path: '/structure'
@@ -240,6 +309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWarningsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/workload': {
+      id: '/_authenticated/workload'
+      path: '/workload'
+      fullPath: '/workload'
+      preLoaderRoute: typeof AuthenticatedWorkloadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -247,20 +323,28 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAttendanceRoute: typeof AuthenticatedAttendanceRoute
   AuthenticatedCoursesRoute: typeof AuthenticatedCoursesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedLecturesRoute: typeof AuthenticatedLecturesRoute
+  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedStructureRoute: typeof AuthenticatedStructureRoute
   AuthenticatedTimetableRoute: typeof AuthenticatedTimetableRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedWarningsRoute: typeof AuthenticatedWarningsRoute
+  AuthenticatedWorkloadRoute: typeof AuthenticatedWorkloadRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAttendanceRoute: AuthenticatedAttendanceRoute,
   AuthenticatedCoursesRoute: AuthenticatedCoursesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedLecturesRoute: AuthenticatedLecturesRoute,
+  AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedStructureRoute: AuthenticatedStructureRoute,
   AuthenticatedTimetableRoute: AuthenticatedTimetableRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedWarningsRoute: AuthenticatedWarningsRoute,
+  AuthenticatedWorkloadRoute: AuthenticatedWorkloadRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
